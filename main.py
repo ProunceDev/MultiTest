@@ -19,7 +19,7 @@ class MinetestLauncherApp(ctk.CTk):
 		self.exit_code = 0
 		# Initialize window
 		self.geometry("800x600")
-		theme = self.settings.get_setting("theme", "night")
+		theme = self.settings.get_setting("theme", "Night-Dark")
 		scale = self.settings.get_setting("scale", "100%")
 		self.new_scaling_float = int(scale.replace("%", "")) / 100
 		color, light = theme.split("-")
