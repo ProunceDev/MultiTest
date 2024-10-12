@@ -1,0 +1,4 @@
+pywinstyles
+customtkinter
+Pillow
+configparser

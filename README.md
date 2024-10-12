@@ -7,6 +7,16 @@
 - **Instance Management**: Easily create, modify, and manage multiple Minetest instances.
 - **User-Friendly Interface**: Clean and intuitive UI for managing all aspects of your Minetest experience.
 
+## **Use:**
+ *Windows*
+
+ - Download this repo either using `git clone https://github.com/ProunceDev/MultiTest.git` or the green `Code` button on the website.
+ - Install [Python](https://www.python.org/downloads/).
+ - [Open the downloaded folder in command prompt](https://www.wikihow.com/Open-a-Folder-in-Cmd).
+ - First run `pip install -r requirements.txt`.
+ - Then run `python main.py`.
+ - Enjoy!
+
 ## **TODO:**
 
 - Refactor `settings.py` to use the `configparser` library for configuration management.
