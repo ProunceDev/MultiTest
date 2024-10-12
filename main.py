@@ -45,7 +45,7 @@ class MinetestLauncherApp(ctk.CTk):
 		self.launcher_settings.pack(padx=5, pady=5, expand=True, fill="both")
 		ctk.CTkLabel(self.launcher_settings, text="Theme:", anchor="w").grid(row=0, column=0, padx=10, pady=(10, 10))
 		self.theme = ctk.StringVar(self)
-		self.theme.set(self.settings.get_setting("theme", "Purple-Dark"))
+		self.theme.set(self.settings.get_setting("theme", "Night-Dark"))
 		ctk.CTkOptionMenu(self.launcher_settings, variable=self.theme, values=["Blue-Light", "Green-Light", "Purple-Light", "Night-Light", "Blue-Dark", "Green-Dark", "Purple-Dark", "Night-Dark"], command=self.change_appearance_mode_event).grid(row=0, column=1, padx=10, pady=(10, 10))
 		ctk.CTkLabel(self.launcher_settings, text="Scale:", anchor="w").grid(row=1, column=0, padx=10, pady=(10, 10))
 		self.scale = ctk.StringVar(self)
