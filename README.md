@@ -1,6 +1,10 @@
 # **MultiTest**  
 *A comprehensive Minetest launcher with global configs, instance management, and enhanced mod support.*
 
+## **Preview:**
+
+![Main screen](https://github.com/ProunceDev/MultiTest/blob/main/doc/preview.png?raw=true)
+
 ## **Features:**
 
 - **Global Configurations**: Manage settings across multiple instances from a single global configuration file.
