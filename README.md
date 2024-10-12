@@ -17,6 +17,10 @@
  - Then run `python main.py`.
  - Enjoy!
 
+ *Other OSes*
+
+ - MultiTest currently only supports windows, but if you are willing to work with me we could bring MultiTest to your platform.
+
 ## **TODO:**
 
 - Refactor `settings.py` to use the `configparser` library for configuration management.
