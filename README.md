@@ -3,7 +3,10 @@
 
 ## **Preview:**
 
+![Icon](https://github.com/ProunceDev/MultiTest/blob/main/assets/icon.png?raw=true)
 ![Main screen](https://github.com/ProunceDev/MultiTest/blob/main/doc/preview.png?raw=true)
+![Create instance](https://github.com/ProunceDev/MultiTest/blob/main/doc/create_instance.png?raw=true)
+![Manage instance](https://github.com/ProunceDev/MultiTest/blob/main/doc/manage_instance.png?raw=true)
 
 ## **Features:**
 
