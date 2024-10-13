@@ -23,11 +23,30 @@
 
  *Other OSes*
 
- - MultiTest currently only supports windows, but if you are willing to work with me we could bring MultiTest to your platform.
+ - MultiTest currently only supports Windows, but if you are willing to work with me, we could bring MultiTest to your platform.
+
+## **Compile:**
+
+If you want to compile MultiTest into a standalone executable, follow these steps:
+
+1. **Install Dependencies**:
+    - Ensure you have [Python](https://www.python.org/downloads/) installed.
+    - Open a command prompt in the **MultiTest** folder and run the following command to install all the necessary libraries: `pip install -r requirements.txt`
+
+2. **Compile Using `build.bat`**:
+    - In the **MultiTest** folder, double-click or run the `build.bat` script in the command prompt.
+    - The script will:
+        - Create a `build` folder to store temporary files.
+        - Compile the `main.py` file into an executable using `PyInstaller`.
+        - Move the final executable (`MultiTest.exe`) back to the main **MultiTest** folder.
+    - After compilation, the `MultiTest.exe` will be ready for use in the main folder.
+
+3. **Run the Compiled Executable**:
+    - Once the compilation is complete, you can simply run `MultiTest.exe` without needing to install Python or any dependencies.
 
 ## **TODO:**
 
 - Refactor `settings.py` to use the `configparser` library for configuration management.
 - Split `instance_manager.py` into multiple smaller files, with each file handling a specific class.
 - Add ContentDB support to allow adding mods directly from the mod configuration menu.
-- Find someone on linux willing to help out with adding support for basic Ubuntu and maybe a couple other OSes.
+- Find someone on Linux willing to help out with adding support for basic Ubuntu and maybe a couple other OSes.

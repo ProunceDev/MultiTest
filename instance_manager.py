@@ -1,18 +1,19 @@
 import os, configparser, urllib.request, zipfile, threading, shutil, subprocess, customtkinter as ctk
 from tkinter import StringVar, messagebox
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
 class CreateInstanceWindow(ctk.CTkToplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, current_dir):
         super().__init__(parent)
         self.geometry("400x400")
         self.size = ("400x400")
         self.title("New Instance - MultiTest")
         self.output = None
-        
+        self.current_dir = current_dir
+        self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
         ctk.set_appearance_mode(parent.light)
         ctk.set_default_color_theme(parent.color)
         ctk.set_widget_scaling(parent.new_scaling_float)
+
         # Layout management
         self.grid_columnconfigure((0, 1), weight=1)
         self.grid_rowconfigure((0,1,2,3), weight=1)
@@ -70,7 +71,7 @@ class CreateInstanceWindow(ctk.CTkToplevel):
 
         # Load versions
         self.version_data = []
-        self.load_versions(os.path.join(os.path.dirname(__file__), 'config/versions.txt'))
+        self.load_versions(os.path.join(current_dir, 'config/versions.txt'))
 
     def load_versions(self, filepath):
         """Load versions from a file and display them."""
@@ -124,12 +125,13 @@ class CreateInstanceWindow(ctk.CTkToplevel):
         self.destroy()
 
 class InstanceManager:
-    def __init__(self, instances_folder) -> None:
+    def __init__(self, instances_folder, current_dir) -> None:
         """
         Initialize the InstanceManager with the folder where instances are stored.
         """
         self.instances_folder = instances_folder
         self.instances = {}
+        self.current_dir = current_dir
         self.load_instances()
 
     def load_instances(self) -> None:
@@ -199,7 +201,7 @@ class InstanceManager:
 
         return None  # If no folder is found
     
-    def launch_instance(self, instance_name, parent):
+    def launch_instance(self, instance_name, current_dir):
         instance_path = self.get_instance_path(instance_name)
         settings = self.get_instance_settings(instance_path)
         install_path = self.get_instance_install_path(instance_path)
@@ -324,7 +326,7 @@ class DownloadModal(ctk.CTkToplevel):
         self.version = version
         self.destination_folder = destination_folder
         self.zip_file_path = f"{version}.zip"
-        
+        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
         self.geometry("400x100")
         self.title(f"Installing {self.version}")
         self.size = "400x100"
@@ -379,6 +381,7 @@ class DeleteConfirmationWindow(ctk.CTkToplevel):
         self.geometry("300x150")
         self.size = "300x150"
         self.resizable(False, False)
+        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
         self.instance_name = instance_name
         self.on_confirm = on_confirm
 
@@ -418,6 +421,7 @@ class InstanceConfigManager(ctk.CTkToplevel):
         self.geometry("400x500")
         self.size = ("400x500")
         self.resizable(False, False)
+        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
         self.parent = parent
         # Dictionary to store selected mods
         self.instance_name = instance_name

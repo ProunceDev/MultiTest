@@ -1,20 +1,32 @@
-import os, pywinstyles, customtkinter as ctk
-from functools import partial
+# Pyinstaller compatability code
+import os, sys
+
+current_dir = ''
+# attempting to get where the program files are stored
+if getattr(sys, 'frozen', False): 
+	# if program was frozen (compiled) using pyinstaller, the pyinstaller bootloader creates a sys attribute
+	# frozen=True to indicate that the script file was compiled using pyinstaller, then it creates a
+	# constant in sys that points to the directory where program executable is (where program files are extracted in).
+	current_dir = os.path.dirname(os.path.abspath(sys.executable))
+	# changing the current working directory to the path where one-file mode source files are extracted in.
+	os.chdir(sys._MEIPASS)
+else: 
+	# if program is not frozen (compiled) using pyinstaller and is running normally like a Python 3.x.x file.
+	current_dir = os.path.dirname(os.path.abspath(__file__))
+
+import pywinstyles, customtkinter as ctk
 from settings import SettingsManager
-from instance_manager import InstanceManager, CreateInstanceWindow, DeleteConfirmationWindow, InstanceConfigManager
+from instance_manager import *
 from PIL import Image
 from datetime import datetime
-
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
 # Initialize the main app window
 class MinetestLauncherApp(ctk.CTk):
 	def __init__(self):
 		super().__init__()
-
+		self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
 		# Initialize settings and instances
 		self.settings = SettingsManager(os.path.join(current_dir, "config/settings.json"))
-		self.instances = InstanceManager(os.path.join(current_dir, "instances"))
+		self.instances = InstanceManager(os.path.join(current_dir, "instances"), current_dir)
 		self.instance_cards = {}
 		self.exit_code = 0
 		# Initialize window
@@ -160,7 +172,7 @@ class MinetestLauncherApp(ctk.CTk):
 		modal.wait_window()
 
 	def launch_instance(self, instance_name):
-		self.instances.launch_instance(instance_name, self)
+		self.instances.launch_instance(instance_name, current_dir)
 
 	def confirm_delete_instance(self, instance_name):
 		path = self.instances.get_instance_path(instance_name)
@@ -196,7 +208,7 @@ class MinetestLauncherApp(ctk.CTk):
 		window.geometry(f"{int(window_width)}x{int(window_height)}+{x}+{y}")
 
 	def create_new_instance(self):
-		modal = CreateInstanceWindow(self)
+		modal = CreateInstanceWindow(self, current_dir)
 		modal.grab_set()
 		self.center_window(modal)
 		modal.wait_window()
@@ -216,4 +228,4 @@ if __name__ == "__main__":
 		app = MinetestLauncherApp()
 		app.mainloop()
 		if app.exit_code == 0:
-			exit()
+			sys.exit()
