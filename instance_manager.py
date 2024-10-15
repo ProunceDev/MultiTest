@@ -258,7 +258,7 @@ class InstanceManager:
                         title = line.split('=')[1].strip()
                     elif line.startswith(author_key):
                         author = line.split('=')[1].strip()
-        except FileNotFoundError:
+        except:
             pass  # If the file doesn't exist, we return None values
         return title, author
     
