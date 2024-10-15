@@ -1,4 +1,4 @@
-import os, configparser, urllib.request, zipfile, threading, shutil, subprocess, customtkinter as ctk
+import os, configparser, urllib.request, zipfile, threading, shutil, subprocess, re, customtkinter as ctk
 from tkinter import StringVar, messagebox
 
 class CreateInstanceWindow(ctk.CTkToplevel):
@@ -9,7 +9,7 @@ class CreateInstanceWindow(ctk.CTkToplevel):
         self.title("New Instance - MultiTest")
         self.output = None
         self.current_dir = current_dir
-        self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
+        
         ctk.set_appearance_mode(parent.light)
         ctk.set_default_color_theme(parent.color)
         ctk.set_widget_scaling(parent.new_scaling_float)
@@ -71,7 +71,14 @@ class CreateInstanceWindow(ctk.CTkToplevel):
 
         # Load versions
         self.version_data = []
-        self.load_versions(os.path.join(current_dir, 'config/versions.txt'))
+        
+        # Linux compatability
+        if os.name == 'nt':
+            self.load_versions(os.path.join(current_dir, 'config/versions.txt'))
+
+            self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
+        else:
+            self.load_versions(os.path.join(current_dir, 'config/versions_linux.txt'))
 
     def load_versions(self, filepath):
         """Load versions from a file and display them."""
@@ -206,15 +213,23 @@ class InstanceManager:
         settings = self.get_instance_settings(instance_path)
         install_path = self.get_instance_install_path(instance_path)
 
-        
+        # Ensure the global config is created for Minetest if required
         if settings.get("global_config", "1") == "1":
-            # Ensure the global config is created because for some reason minetest crashes if it isn't
             with open(os.path.join(current_dir, "config", "global_minetest.conf"), 'a') as file:
                 pass
 
-            subprocess.Popen(f'"{os.path.join(install_path, "bin", "minetest.exe")}" --config {os.path.join(current_dir, "config", "global_minetest.conf")}', creationflags=subprocess.CREATE_NEW_CONSOLE)
+        # Prepare the command to launch Minetest
+        config_path = os.path.join(current_dir, "config", "global_minetest.conf")
+        minetest_executable = os.path.join(install_path, "bin", "minetest")
+
+        if os.name == 'nt':
+            # Windows
+            command = f'"{minetest_executable}".exe --config "{config_path}"' if settings.get("global_config", "1") == "1" else f'"{minetest_executable}"'
+            subprocess.Popen(command, creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
-            subprocess.Popen(f'"{os.path.join(install_path, "bin", "minetest.exe")}"', creationflags=subprocess.CREATE_NEW_CONSOLE)
+            # Linux
+            command = f'"{minetest_executable}" --config "{config_path}"' if settings.get("global_config", "1") == "1" else f'"{minetest_executable}"'
+            subprocess.Popen(command, shell=True)  # No need for creationflags on Linux
 
     def list_instances(self) -> dict:
         """
@@ -326,7 +341,9 @@ class DownloadModal(ctk.CTkToplevel):
         self.version = version
         self.destination_folder = destination_folder
         self.zip_file_path = f"{version}.zip"
-        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
+        self.parent = parent
+        if os.name == 'nt':
+            self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
         self.geometry("400x100")
         self.title(f"Installing {self.version}")
         self.size = "400x100"
@@ -350,11 +367,38 @@ class DownloadModal(ctk.CTkToplevel):
 
             self.status_label.configure(text=f"Installing {self.version}: Extracting")
             self.extract_zip()
-
             self.status_label.configure(text=f"Installed {self.version} successfully.")
+
+            if os.name == "posix":
+                self.compile_mt()  # Call the compile method for Linux
+                self.status_label.configure(text=f"You may have to build manually.")
+            
             self.cancel_button.configure(text="Close")
         except Exception as e:
             self.status_label.configure(text=f"Error: {e}")
+
+    def compile_mt(self):
+        try:
+            # Define the install and compile commands combined into one string
+            install_command = (
+                'sudo apt install -y g++ make libc6-dev cmake libpng-dev libjpeg-dev '
+                'libxi-dev libgl1-mesa-dev libsqlite3-dev libogg-dev libvorbis-dev '
+                'libopenal-dev libcurl4-gnutls-dev libfreetype6-dev zlib1g-dev '
+                'libgmp-dev libjsoncpp-dev libzstd-dev libluajit-5.1-dev gettext '
+                'libbz2-dev && '
+                f'cd "{self.parent.instances.get_instance_install_path(self.destination_folder)}" && '
+                'cmake . -DRUN_IN_PLACE=TRUE && make -j$(nproc) && read -p "Press any key ..."'
+            )
+
+            # Open a new gnome-terminal and run the combined command
+            subprocess.Popen(['gnome-terminal', '--', 'bash', '-c', install_command])
+
+            # Update status label to indicate the command is being executed
+            self.status_label.configure(text=f"Installing {self.version}: Running installation in new terminal")
+
+        except Exception as e:
+            self.status_label.configure(text=f"Error: {e}")
+
 
     def update_progress(self, block_num, block_size, total_size):
         downloaded = block_num * block_size
@@ -381,7 +425,6 @@ class DeleteConfirmationWindow(ctk.CTkToplevel):
         self.geometry("300x150")
         self.size = "300x150"
         self.resizable(False, False)
-        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
         self.instance_name = instance_name
         self.on_confirm = on_confirm
 
@@ -403,6 +446,9 @@ class DeleteConfirmationWindow(ctk.CTkToplevel):
 
         self.no_button = ctk.CTkButton(self.button_frame, text="No", command=self.cancel)
         self.no_button.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+        # Linux Compatability
+        if os.name == 'nt':
+            self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
 
     def confirm_delete(self):
         """Calls the provided on_confirm callback and closes the window."""
@@ -421,7 +467,7 @@ class InstanceConfigManager(ctk.CTkToplevel):
         self.geometry("400x500")
         self.size = ("400x500")
         self.resizable(False, False)
-        self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
+        
         self.parent = parent
         # Dictionary to store selected mods
         self.instance_name = instance_name
@@ -440,6 +486,10 @@ class InstanceConfigManager(ctk.CTkToplevel):
         self.init_mods(self.mods_tab)
         self.init_texture_packs(self.texture_packs_tab)
         self.init_settings(self.settings_tab)
+
+        # Linux Compatability
+        if os.name == "nt":
+            self.after(201, lambda :self.iconbitmap(os.path.join(parent.instances.current_dir, "assets/icon.ico")))
 
 
     def init_mods(self, tab):
@@ -465,7 +515,7 @@ class InstanceConfigManager(ctk.CTkToplevel):
         button_frame = ctk.CTkFrame(tab)
         button_frame.pack(pady=10)
 
-        open_folder = ctk.CTkButton(button_frame, text="Open Folder", command=lambda: os.startfile(os.path.join(self.parent.instances.get_instance_install_path(self.parent.instances.get_instance_path(self.instance_name)), "mods")))
+        open_folder = ctk.CTkButton(button_frame, text="Open Folder", command=lambda: self.open_folder(os.path.join(self.parent.instances.get_instance_install_path(self.parent.instances.get_instance_path(self.instance_name)), "mods")))
 
         open_folder.grid(row=0, column=0, padx=5)
 
@@ -492,9 +542,14 @@ class InstanceConfigManager(ctk.CTkToplevel):
         button_frame = ctk.CTkFrame(tab)
         button_frame.pack(pady=10)
 
-        open_folder = ctk.CTkButton(button_frame, text="Open Folder", command=lambda: os.startfile(os.path.join(self.parent.instances.get_instance_install_path(self.parent.instances.get_instance_path(self.instance_name)), "textures")))
+        open_folder = ctk.CTkButton(button_frame, text="Open Folder", command=lambda: self.open_folder(os.path.join(self.parent.instances.get_instance_install_path(self.parent.instances.get_instance_path(self.instance_name)), "textures")))
         open_folder.grid(row=0, column=2, padx=5)
 
+    def open_folder(self, folder_path):
+        if os.name == "nt":
+            os.startfile(folder_path)
+        else:
+            subprocess.Popen(["xdg-open", folder_path])
 
     def init_settings(self, tab):
         # Settings UI

@@ -24,9 +24,18 @@
  - Then run `python main.py`.
  - Enjoy!
 
+ *Ubuntu/Debian*
+
+ - Download this repo either using `git clone https://github.com/ProunceDev/MultiTest.git` or the green `Code` button on the website.
+ - Install [Python](https://www.python.org/downloads/).
+ - Open the downloaded folder in your terminal.
+ - First run `pip install -r requirements.txt`.
+ - Then run `python main.py`.
+ - Enjoy!
+
  *Other OSes*
 
- - MultiTest currently only supports Windows, but if you are willing to work with me, we could bring MultiTest to your platform.
+ - MultiTest currently only supports Windows and Ubuntu/Debian, but if you are willing to work with me, we could bring MultiTest to your platform.
 
 ## **Compile:**
 
@@ -44,12 +53,19 @@ If you want to compile MultiTest into a standalone executable, follow these step
         - Move the final executable (`MultiTest.exe`) back to the main **MultiTest** folder.
     - After compilation, the `MultiTest.exe` will be ready for use in the main folder.
 
+3. **Compile Using `build.sh` Ubuntu/Debian**:
+    - In the **MultiTest** folder, double-click or run the `build.sh` script in the terminal.
+    - The script will:
+        - Create a `build` folder to store temporary files.
+        - Compile the `main.py` file into an executable using `PyInstaller`.
+        - Move the final executable (`MultiTest`) back to the main **MultiTest** folder.
+    - After compilation, the `MultiTest` will be ready for use in the main folder.
+
 3. **Run the Compiled Executable**:
-    - Once the compilation is complete, you can simply run `MultiTest.exe` without needing to install Python or any dependencies.
+    - Once the compilation is complete, you can simply run `MultiTest.exe` ( 'MultiTest' on Ubuntu/Debian ) without needing to install Python or any dependencies.
 
 ## **TODO:**
 
 - Refactor `settings.py` to use the `configparser` library for configuration management.
 - Split `instance_manager.py` into multiple smaller files, with each file handling a specific class.
 - Add ContentDB support to allow adding mods directly from the mod configuration menu.
-- Find someone on Linux willing to help out with adding support for basic Ubuntu and maybe a couple other OSes.

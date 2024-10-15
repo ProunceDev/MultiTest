@@ -1,6 +1,5 @@
 # Pyinstaller compatability code
 import os, sys
-
 current_dir = ''
 # attempting to get where the program files are stored
 if getattr(sys, 'frozen', False): 
@@ -14,16 +13,23 @@ else:
 	# if program is not frozen (compiled) using pyinstaller and is running normally like a Python 3.x.x file.
 	current_dir = os.path.dirname(os.path.abspath(__file__))
 
-import pywinstyles, customtkinter as ctk
+
+import customtkinter as ctk
 from settings import SettingsManager
 from instance_manager import *
 from PIL import Image
 from datetime import datetime
+
+# Linux compatability code
+if os.name == 'nt':
+	import pywinstyles
+else:
+	ctk.DrawEngine.preferred_drawing_method = "polygon_shapes"
 # Initialize the main app window
 class MinetestLauncherApp(ctk.CTk):
 	def __init__(self):
 		super().__init__()
-		self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
+		
 		# Initialize settings and instances
 		self.settings = SettingsManager(os.path.join(current_dir, "config/settings.json"))
 		self.instances = InstanceManager(os.path.join(current_dir, "instances"), current_dir)
@@ -64,9 +70,9 @@ class MinetestLauncherApp(ctk.CTk):
 		self.scale.set(self.settings.get_setting("scale", "100%"))
 		ctk.CTkOptionMenu(self.launcher_settings, variable=self.scale, values=["60%", "80%", "100%", "120%", "140%"], command=self.change_scaling_event).grid(row=1, column=1, padx=10, pady=(10, 10))
 		self.initialized = True
-		
-		pywinstyles.apply_style(self, "dark")
-		self.after(100, lambda: pywinstyles.apply_style(self, "dark"))
+		if os.name == 'nt':
+			pywinstyles.apply_style(self, "dark")
+			self.after(201, lambda :self.iconbitmap(os.path.join(current_dir, "assets/icon.ico")))
 
 	def change_appearance_mode_event(self, new_appearance_mode: str):
 		self.settings.set_setting('theme', new_appearance_mode)
